@@ -1,0 +1,12 @@
+
+            Expense Reimbursement Policy
+            
+            Employees can be reimbursed for business-related expenses.
+            All expenses must be submitted within 30 days with receipts.
+            Meals are reimbursed up to $50 per day during business travel.
+            Transportation costs for business trips are fully covered.
+            Hotel accommodation is covered up to $200 per night.
+            Submit expense reports through the finance portal at finance.company.com.
+            Approval from manager required for expenses over $500.
+            Personal expenses will not be reimbursed under any circumstances.
+            

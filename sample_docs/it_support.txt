@@ -1,0 +1,12 @@
+
+            IT Support Guidelines
+            
+            For technical issues, contact IT support at it-help@company.com
+            For urgent issues, call the IT hotline: (555) 123-4567
+            Common issues can be resolved through the self-service portal.
+            New equipment requests should be submitted through IT portal.
+            Software installation requires IT approval for security reasons.
+            Password resets can be done through the company portal.
+            VPN access is required for remote work - contact IT for setup.
+            Regular security training is mandatory for all employees.
+            
