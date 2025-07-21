@@ -1,7 +1,10 @@
 import os
+import mimetypes
+from pathlib import Path
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from local_vector_store import LocalVectorStore
 from dotenv import load_dotenv
+from sentence_transformers import SentenceTransformer
 
 load_dotenv()
 
@@ -11,6 +14,10 @@ class DocumentProcessor:
         print("Initializing local vector store...")
         self.vector_store = LocalVectorStore()
         print("Vector store ready!")
+
+        print("Loading SentenceTransformer model...")
+        self.embedding_model = SentenceTransformer("sentence-transformers/all-mpnet-base-v2")
+        print("Embedding model loaded.")
         
         # Initialize text splitter
         self.text_splitter = RecursiveCharacterTextSplitter(
@@ -41,15 +48,66 @@ class DocumentProcessor:
                     "source": file_path
                 })
             
+            # Embed each chunk
+            embeddings = self.embedding_model.encode(texts)
+
             # Add to vector store
-            self.vector_store.add_documents(texts, metadatas)
-            
+            try:
+                self.vector_store.add_documents(texts, metadatas, embeddings=embeddings)
+            except Exception as e:
+                print(f"Error adding documents to vector store: {str(e)}")
+                return False
+
             print(f"Successfully processed {file_path}")
             return True
             
         except Exception as e:
             print(f"Error processing {file_path}: {str(e)}")
             return False
+
+    def detect_file_type(self, file_path):
+        """Detect file type using multiple methods"""
+        # Try MIME type detection
+        mime_type, _ = mimetypes.guess_type(file_path)
+        
+        # Fallback to file extension
+        extension = Path(file_path).suffix.lower()
+        
+        return mime_type, extension
+
+    def process_any_file(self, file_path, document_id):
+        """Process any supported file type"""
+        mime_type, extension = self.detect_file_type(file_path)
+    
+        if extension in ['.txt']:
+            return self.process_text_file(file_path, document_id)
+        elif extension in ['.pdf']:
+            return self.process_pdf_file(file_path, document_id)
+        elif extension in ['.docx']:
+            return self.process_docx_file(file_path, document_id)
+        elif extension in ['.csv']:
+            return self.process_csv_file(file_path, document_id)
+        else:
+            print(f"Unsupported file type: {extension}")
+            return False
+
+    def get_chunking_strategy(self, document_type):
+        """Get optimal chunking strategy based on document type"""
+        strategies = {
+            'policy': RecursiveCharacterTextSplitter(
+                chunk_size=1500, chunk_overlap=300
+            ),
+            'handbook': RecursiveCharacterTextSplitter(
+                chunk_size=2000, chunk_overlap=400
+            ),
+            'csv_data': RecursiveCharacterTextSplitter(
+                chunk_size=800, chunk_overlap=100
+            ),
+            'default': RecursiveCharacterTextSplitter(
+                chunk_size=1000, chunk_overlap=200
+            )
+        }
+        return strategies.get(document_type, strategies['default'])
     
     def add_sample_documents(self):
         """Add some sample company documents"""

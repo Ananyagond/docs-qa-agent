@@ -5,10 +5,11 @@ import os
 from sentence_transformers import SentenceTransformer
 
 class LocalVectorStore:
-    def __init__(self, dimension=384, store_path="vector_store"):
+    def __init__(self, dimension=768, store_path="vector_store"):
         self.dimension = dimension
         self.store_path = store_path
-        self.embeddings_model = SentenceTransformer('all-MiniLM-L6-v2')
+        #self.embeddings_model = SentenceTransformer('all-MiniLM-L6-v2')
+        self.embeddings_model = SentenceTransformer("sentence-transformers/all-mpnet-base-v2")
         
         # Create storage directory
         os.makedirs(store_path, exist_ok=True)
@@ -29,30 +30,37 @@ class LocalVectorStore:
         embedding = self.embeddings_model.encode(text)
         return embedding
     
-    def add_documents(self, texts, metadatas):
+    def add_documents(self, texts, metadatas, embeddings=None):
         """Add documents to the vector store"""
         print(f"Adding {len(texts)} documents to vector store...")
-        
-        embeddings = []
-        for text in texts:
-            embedding = self.get_embedding(text)
-            embeddings.append(embedding)
-        
+
+        if embeddings is None:
+            embeddings = []
+            for text in texts:
+                embedding = self.get_embedding(text)
+                embeddings.append(embedding)
+
         embeddings = np.array(embeddings).astype('float32')
-        
+
         # Normalize for cosine similarity
         faiss.normalize_L2(embeddings)
-        
+
         # Add to index
-        self.index.add(embeddings)
+        try:
+            self.index.add(embeddings)
+        except Exception as e:
+            print(f"Error adding to index: {str(e)}")
+            return  # Exit if adding to index fails
+
         self.texts.extend(texts)
         self.metadata.extend(metadatas)
-        
+
         # Save automatically
         self.save_index()
-        print(f"Successfully added documents. Total documents: {len(self.texts)}")
+        print(f"✅ Successfully added documents. Total documents: {len(self.texts)}")
+
     
-    def search(self, query, k=3, score_threshold=0.7):
+    def search(self, query, k=3, score_threshold=0.5):
         """Search for similar documents"""
         if len(self.texts) == 0:
             return []
