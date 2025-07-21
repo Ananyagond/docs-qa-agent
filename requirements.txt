@@ -1,8 +1,29 @@
-sentence-transformers
-langchain
-faiss-cpu
-streamlit
-transformers
-torch
-openai
-python-dotenv
+# Core app dependencies
+streamlit==1.35.0
+pandas==2.2.2
+numpy==1.26.4
+
+# Document handling
+python-docx==1.1.0
+PyPDF2==3.0.1
+
+# NLP and Vector Store
+transformers==4.41.1
+sentence-transformers==2.6.1
+faiss-cpu==1.7.4  # or faiss-gpu if using GPU
+
+# Backend utility
+scikit-learn==1.4.2
+
+# For file type handling and time parsing
+python-magic==0.4.27
+python-dateutil==2.9.0.post0
+
+# Optional: tqdm for loading bars, helpful in some transformers
+tqdm==4.66.4
+
+# System utilities
+requests==2.32.3
+
+# Local development
+watchdog==4.0.0
